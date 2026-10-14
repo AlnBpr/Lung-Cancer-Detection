@@ -12,9 +12,13 @@ Developed for **COMP1827 Introduction to Artificial Intelligence**, University o
 2. Excluded the benign category to focus on binary classification.
 3. Froze the pretrained layers and trained the final classification layer for **5 epochs**.
 4. Unfroze the final convolutional block and fine-tuned the model for **5 additional epochs**.
-5. Used the **Adam optimiser**, a **0.0001 learning rate**, **batch size 32**, and **class weighting** to account for the two categories.
+5. Used the **Adam optimiser**, a **0.0001 initial learning rate** (**0.00001 for fine-tuning**), **batch size 32**, and **class weighting** to account for the two categories.
 6. Exchanged **50 unique images** between the training and testing collections to introduce CT images from different sources, as described in the project report.
-7. Evaluated predictions with a confusion matrix and classification report; the confusion-matrix evaluation was implemented as part of my work.
+7. Evaluated predictions with a confusion matrix and classification report. The uploaded training script generates these metrics for its own test split; the paper's reported results are documented separately below.
+
+## Code origin and my experiment
+
+The training implementation is **adapted from Seyed Vala Khorasani's Kaggle ResNet-50 notebook**; it is not presented as an original model implementation. For my coursework, I selected/prepared CT datasets, ran training and evaluation, and analysed the outputs. The separate `predict.py` script loads the saved model for individual-image predictions. The precise line-by-line differences from the source notebook have not been independently verified.
 
 ## Datasets and preparation
 
@@ -30,6 +34,8 @@ The report describes **2,409 training images** and a prepared testing collection
 
 Datasets are not redistributed in this repository. Please consult the original sources for access and licensing terms.
 
+**Important:** `train.py` currently reads images from a local folder named `Augmented IQ-OTHNCCD lung cancer dataset` and makes a **stratified 70% train / 15% validation / 15% test split** of the images found there. This is **not the same as** the separately sourced train/test arrangement described in the paper. The script cannot, on its own, substantiate the paper's 362-image classification report. The model checkpoint and dataset contents used in that run are not included.
+
 ## Reported results
 
 The classification report in the project paper gives the following results for **362 evaluated CT images**:
@@ -40,7 +46,7 @@ The classification report in the project paper gives the following results for *
 | Cancerous | 1.00 | 0.98 | 0.99 | 180 |
 | **Overall accuracy** | | | **0.99** | **362** |
 
-**Reported accuracy: 99%.** Cancerous-class recall of 0.98 indicates that some cancerous images were missed; false negatives are particularly important in medical applications. These are **reported experimental metrics**, not a measure of clinical diagnostic reliability or performance on unseen hospitals' data.
+**Accuracy reported in the coursework paper: 99% (not independently reproduced from the uploaded scripts).** Cancerous-class recall of 0.98 indicates that some cancerous images were missed; false negatives are particularly important in medical applications. These are **reported experimental metrics**, not a measure of clinical diagnostic reliability or performance on unseen hospitals' data.
 
 ## Limitations and future work
 
@@ -53,7 +59,7 @@ The classification report in the project paper gives the following results for *
 ## Attribution and credits
 
 - **Original code and licence:** This project adapts Valakhorasani (2021), [*Lung Cancer Detection with Pretrained ResNet-50*](https://www.kaggle.com/code/valakhorasani/lung-cancer-detection-with-pretrained-resnet-50/notebook), published under the **Apache License 2.0**. The original author and source are credited. When publishing adapted code, include a copy of the [Apache 2.0 licence](https://www.apache.org/licenses/LICENSE-2.0), retain applicable copyright and NOTICE information, and identify modifications.
-- **Work described in my project report:** preparation of datasets from three sources, exchange of 50 images, transfer-learning and fine-tuning experiments, class weighting, and implementation of confusion-matrix evaluation. These are reported project activities; the precise code-level changes relative to the original notebook still need to be checked against the source files.
+- **My coursework activity:** selection and preparation of datasets from three sources, reported exchange of 50 images, running and analysing transfer-learning/fine-tuning experiments, and examining predictions and confusion-matrix results. The training code itself is adapted from the credited notebook; specific code-level modifications have not been independently established.
 - **Architecture:** ResNet-50, introduced by He et al. (2016), with pretrained weights through `torchvision.models`.
 - **Tools reported for the project:** PyTorch, torchvision, OpenCV, and Pillow.
 - **Datasets:** Credit belongs to the respective Kaggle dataset publishers linked above.
@@ -68,10 +74,10 @@ The classification report in the project paper gives the following results for *
 
 ## Running the project
 
-The original training/evaluation script or notebook must be included in the repository before reproducible run instructions can be completed. Install the dependencies used in the project with:
+1. Download the datasets from the linked Kaggle pages, subject to their licences. **No CT images are included here.**
+2. Install dependencies: `pip install -r requirements.txt`.
+3. Configure `dataset_root` in `train.py` to point to your locally prepared dataset folder with `Malignant cases` and `Normal cases` subfolders.
+4. Run `python train.py` to train, evaluate and save `resnet50_lung_cancer_binary_detector_training.pth`. Results depend on the dataset actually supplied, random split, software versions, and training environment.
+5. To run individual-image predictions, set `ROOT_FOLDER` and `MODEL_PATH` in `predict.py` and run `python predict.py`. The expected subfolders are `Cancerous raw images - jpg` and `Non-Cancerous raw images - jpg`.
 
-```bash
-pip install torch torchvision opencv-python pillow
-```
-
-Then download the source datasets and configure their paths in the project code. **The exact execution command and any additional dependencies should be documented after checking the actual script/notebook.**
+The `.pth` model weights are not included; you must generate them through training or provide your own compatible checkpoint. The reported paper results have **not** been verified by rerunning these scripts in this repository. This is a research/educational demonstration, not a medical diagnostic tool.
